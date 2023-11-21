@@ -1,12 +1,11 @@
 import chalk from 'chalk'
-import path from 'path'
 
-import { FilePaths } from '../lib/filePaths.js'
+import { Config } from '../lib/config.js'
 
 const action = async () => {
-  const filePaths = new FilePaths()
+  const config = new Config()
 
-  console.log(chalk.yellow('huno build...', filePaths.configFileExists()))
+  console.log(chalk.yellow('huno build...', JSON.stringify(config.fullConfig)))
 }
 
 export default {
