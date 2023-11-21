@@ -8,11 +8,10 @@
     "huno": "bin/huno.js"
   },
   "files": [
-    "bin",
-    "src"
+    "dist"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node build.js"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +19,13 @@
   "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
+    "glob": "^10.3.10",
     "lodash": "^4.17.21",
+    "marked": "^10.0.0",
     "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.7",
+    "esbuild-node-externals": "^1.11.0"
   }
 }
