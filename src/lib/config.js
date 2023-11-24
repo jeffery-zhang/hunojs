@@ -1,7 +1,16 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 import fs from 'fs'
 import lodash from 'lodash'
 import yaml from 'yaml'
+
+const defaultParams = {
+  baseUrl: '/',
+  defaultLang: 'en',
+  title: 'Huno',
+  description: 'Huno is a static site generator',
+  favicon: 'favicon.ico',
+}
 
 export class Config {
   constructor(env = 'prod') {
@@ -14,16 +23,21 @@ export class Config {
   #_configPath = 'config'
   #_configFile = 'config.yaml'
   #_config = {
-    baseUrl: '/',
     outputDir: 'dist',
     contentDir: 'content',
-    theme: 'default',
-    defaultLang: 'en',
-    params: {},
+    templateDir: 'template',
+    template: 'default',
+    globalParams: defaultParams,
   }
 
-  get baseUrl() {
-    return this.#_config.baseUrl
+  get hunoRootPath() {
+    const currentModuleUrl = import.meta.url
+    const currentModulePath = path.dirname(fileURLToPath(currentModuleUrl))
+    const rootDir = path.join(currentModulePath, '../..')
+    return rootDir
+  }
+  get rootPath() {
+    return this.#_rootPath
   }
   get configPath() {
     return path.join(this.#_rootPath, this.#_configPath)
@@ -35,20 +49,20 @@ export class Config {
     const [pre, ext] = this.#_configFile.split('.')
     return path.join(this.#_configPath, `${pre}.${this.#_env}.${ext}`)
   }
-  get outputDir() {
+  get outputPath() {
     return path.join(this.#_rootPath, this.#_config?.outputDir)
   }
   get contentPath() {
     return path.join(this.#_rootPath, this.#_config?.contentDir)
   }
-  get theme() {
-    return this.#_config.theme
+  get templatePath() {
+    return path.join(this.#_rootPath, this.#_config?.templateDir)
   }
-  get defaultLang() {
-    return this.#_config.defaultLang
+  get template() {
+    return this.#_config.template
   }
-  get params() {
-    return this.#_config.params
+  get globalParams() {
+    return this.#_config.globalParams
   }
   get fullConfig() {
     return this.#_config
