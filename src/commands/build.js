@@ -9,14 +9,10 @@ const action = async () => {
   const compiler = new Compiler(config)
   const renderer = new Renderer(config)
 
+  const mds = await compiler.compileMds()
+
   console.log(
-    chalk.yellow('huno build...', JSON.stringify(await compiler.compileMds())),
-  )
-  console.log(
-    chalk.yellow(
-      'huno build...',
-      JSON.stringify(renderer.getDefaultIndexTemplate()),
-    ),
+    chalk.yellow('huno build...', JSON.stringify(renderer.renderAllHtml(mds))),
   )
 }
 

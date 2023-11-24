@@ -1,5 +1,69 @@
 :root {
-  --base-color: #f5f5f5;
-  --base-content-color: #1f1f1f;
-  --primary-color: 
+  /* colors */
+  --base: #ebeff4;
+  --base-content: #2e3440;
+  --primary: #5f81ac;
+  --primary-content: #02060b;
+  --secondary: #80a1c1;
+  --secondary-content: #05090d;
+  --accent: #88c0d0;
+  --accent-content: #060d0f;
+  --neutral: #4c576a;
+  --neutral-content: #d8dee9;
+  --info: #b48ead;
+  --info-content: #0b070b;
+  --success: #a3be8c;
+  --success-content: #0a0d07;
+  --warning: #eacb8b;
+  --warning-content: #140f06;
+  --error: #bf616a;
+  --error-content: #0d0404;
+
+  /* common */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --gap-sm: 16px;
+  --gap-md: 20px;
+  --gap-lg: 24px;
+  --header-height: 60px;
+  --footer-height: 60px;
+  --nav-max-width: 1024px;
+  --main-max-width: 720px;
+  --title-size: 24px;
+  --subtitle-size: 20px;
+  --content-size: 16px;
+  --desc-size: 14px;
+}
+*,
+::after,
+::before {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--base);
+  color: var(--base-content);
+  font-size: var(--content-size);
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  max-width: calc(var(--nav-max-width) + 2 * var(--gap-md));
+  height: var(--header-height);
+  line-height: var(--header-height);
+  margin: 0 auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  margin: auto var(--gap-md);
+}
+
+.logo a {
+  font-size: var(--title-size);
+  font-weight: 700;
+  text-decoration: none;
 }
