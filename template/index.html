@@ -26,5 +26,20 @@
         </div>
       </nav>
     </header>
+    <main id="list">
+      {% for item in list %}
+      <article class="first-entry">
+        <header>
+          <h2>{{item.title}}</h2>
+        </header>
+        <div class="entry-content">
+          <p>{{item.description}}</p>
+        </div>
+        <footer>
+          <span>{{item.date}}</span>
+        </footer>
+      </article>
+      {% endfor %}
+    </main>
   </body>
 </html>

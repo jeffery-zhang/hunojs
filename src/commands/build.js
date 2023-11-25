@@ -11,9 +11,7 @@ const action = async () => {
 
   const mds = await compiler.compileMds()
 
-  console.log(
-    chalk.yellow('huno build...', JSON.stringify(renderer.renderAllHtml(mds))),
-  )
+  console.log(chalk.yellow('huno build...', JSON.stringify(mds)))
 }
 
 export default {

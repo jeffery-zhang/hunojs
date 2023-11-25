@@ -10,15 +10,16 @@ export class Renderer {
 
   config = {}
 
-  renderAllHtml(content) {
-    const indexList = []
-    const indexContent = this.getDefaultIndexTemplate()
-    content.forEach((obj) => {})
+  renderAllHtml(compiledContentList) {
+    const list = compiledContentList
+      .filter(({ config }) => config.title)
+      .map(({ config }) => config)
+    const indexContent = this.getDefaultIndexTemplate(list)
     this.writeIndex(indexContent)
     this.copyAssets()
   }
 
-  getDefaultIndexTemplate() {
+  getDefaultIndexTemplate(list = []) {
     let indexFile
     if (this.config.template === 'default') {
       indexFile = path.join(this.config.hunoRootPath, 'template/index.html')
@@ -30,7 +31,10 @@ export class Renderer {
     }
     try {
       const content = fs.readFileSync(indexFile, 'utf-8')
-      return nunjucks.renderString(content, this.config.globalParams)
+      return nunjucks.renderString(content, {
+        ...this.config.globalParams,
+        list,
+      })
     } catch (err) {
       console.error('read index template error', err)
       throw new Error(err)
