@@ -10,8 +10,9 @@ const action = async () => {
   const renderer = new Renderer(config)
 
   const mds = await compiler.compileMds()
-
-  console.log(chalk.yellow('huno build...', JSON.stringify(mds)))
+  console.log(mds.map((md) => md.config))
+  console.log(mds.map((md) => md.filePath))
+  // renderer.renderAllHtml(mds)
 }
 
 export default {

@@ -1,0 +1,15 @@
+/* content */
+.post {
+  margin-top: var(--gap-lg);
+}
+.post-header .post-title {
+  font-size: var(--header-size);
+}
+.post-header .post-desc {
+  color: var(--primary-content);
+}
+.post-meta {
+  display: flex;
+  gap: var(--gap-sm);
+  color: var(--secondary-content);
+}

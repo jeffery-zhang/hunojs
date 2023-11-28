@@ -1,0 +1,33 @@
+<link
+  rel="preload stylesheet"
+  crossorigin="anonymous"
+  href="{{baseUrl}}assets/css/index.css"
+  as="style"
+/>
+<div class="list">
+  {% for item in list %} {% if loop.first %}
+  <article class="first-entry entry">
+    <header>
+      <h2>{{item.title}}</h2>
+    </header>
+    <div class="entry-content">
+      <p>{{item.description}}</p>
+    </div>
+    <footer>
+      <span>{{item.date}}</span>
+    </footer>
+  </article>
+  {% else %}
+  <article class="entry">
+    <header>
+      <h2>{{item.title}}</h2>
+    </header>
+    <div class="entry-content">
+      <p>{{item.description}}</p>
+    </div>
+    <footer>
+      <span>{{item.date}}</span>
+    </footer>
+  </article>
+  {% endif %} {% endfor %}
+</div>

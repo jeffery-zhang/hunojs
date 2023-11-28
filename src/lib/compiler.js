@@ -2,6 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import { glob } from 'glob'
 import { marked } from 'marked'
+import dayjs from 'dayjs'
 
 export class Compiler {
   constructor(config) {
@@ -27,25 +28,32 @@ export class Compiler {
     mds.forEach((md) => {
       promises.push(
         new Promise(async (resolve) => {
+          const filePath = path.join(this.config.rootPath, md)
           try {
-            fs.readFile(
-              path.join(this.config.rootPath, md),
-              'utf-8',
-              (err, data) => {
-                if (err) {
-                  throw new Error('read file error', err)
-                }
-                const config = this.extractContentConfig(data)
-                const html = this.compileContentWithoutConfig(data)
-                resolve({
-                  path: md,
-                  config,
-                  html,
-                })
-              },
-            )
+            const fileStats = fs.statSync(filePath)
+            const updateTime = fileStats.mtime
+            fs.readFile(filePath, 'utf-8', (err, data) => {
+              if (err) {
+                throw new Error('read file error', err)
+              }
+              const config = this.extractContentConfig(data)
+              const html = this.compileContentWithoutConfig(data)
+              resolve({
+                filePath: filePath.replace('.md', ''),
+                url: this.filePathToUrl(md),
+                config: {
+                  ...config,
+                  author: config.author || 'anonymous',
+                  date:
+                    config.date ||
+                    dayjs(updateTime).format('YYYY-MM-DD HH:mm:ss'),
+                },
+                html,
+              })
+            })
           } catch (err) {
-            throw new Error('compile md content error', err)
+            console.error('compile content files error', err)
+            throw new Error(err)
           }
         }),
       )
@@ -74,5 +82,13 @@ export class Compiler {
     const restContent = content.replace(reg, '').trim()
     const html = marked(restContent)
     return html
+  }
+
+  filePathToUrl(filePath) {
+    const realPath = path.resolve(filePath)
+    return realPath
+      .replace(this.config.contentPath, '')
+      .replaceAll('\\', '/')
+      .replace('.md', '')
   }
 }
