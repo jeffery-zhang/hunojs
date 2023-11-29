@@ -11,6 +11,7 @@
   height: 100%;
 }
 .entry {
+  position: relative;
   width: 49%;
   margin-bottom: var(--gap-md);
   padding: var(--gap-md);
@@ -19,6 +20,14 @@
   border-radius: var(--radius-md);
   background-color: var(--base-100);
   cursor: pointer;
+}
+.link {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
 }
 .entry.first-entry {
   width: 100%;

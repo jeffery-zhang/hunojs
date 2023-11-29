@@ -138,3 +138,6 @@ dist
 
 # turborepo local cache
 .turbo
+
+# build file
+huno.bin.cjs

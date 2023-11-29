@@ -2,14 +2,17 @@
 .post {
   margin-top: var(--gap-lg);
 }
+.post-header {
+  margin-bottom: var(--gap-md);
+}
 .post-header .post-title {
   font-size: var(--header-size);
 }
 .post-header .post-desc {
-  color: var(--primary-content);
+  color: var(--secondary);
 }
 .post-meta {
   display: flex;
   gap: var(--gap-sm);
-  color: var(--secondary-content);
+  color: var(--primary);
 }

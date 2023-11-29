@@ -2,145 +2,212 @@ import path from 'path'
 import fs from 'fs'
 import nunjucks from 'nunjucks'
 import * as cheerio from 'cheerio'
-import dayjs from 'dayjs'
+import chalk from 'chalk'
 
 export class Renderer {
-  constructor(config) {
-    if (!config) throw new Error('config is required')
-    this.config = config
+  constructor(config, compiledContentList) {
+    if (!config) {
+      console.error(
+        chalk.redBright('Renderer class Error: config is required!'),
+      )
+      process.exit(1)
+    }
+    if (!compiledContentList || compiledContentList.length === 0) {
+      console.error(
+        chalk.redBright(
+          'Renderer class Error: compiled content list is required!',
+        ),
+      )
+      process.exit(1)
+    }
+    this.#_config = config
+    this.#_originalBasicLayoutHtmlString =
+      this.#_getSingleOriginalHtmlTemplate('basicLayout')
+    this.#_compiledContentList = compiledContentList
   }
 
-  config = {}
+  #_config = {}
+  #_originalBasicLayoutHtmlString = ''
+  #_compiledContentList = []
 
-  renderAllHtml(compiledContentList) {
-    const list = compiledContentList
-      .filter(({ config }) => config.title)
-      .map(({ config }) => config)
-    const basicLayout = this.getBasicLayoutContent()
-    const indexList = this.getIndexListTemplate(list)
-    const indexTemplate = this.generateIndexTemplate(basicLayout, indexList)
-    this.writeIndex(indexTemplate)
-    this.copyAssets()
-  }
-
-  getBasicLayoutContent() {
-    let basicLayout
-    if (this.config.template === 'default') {
-      basicLayout = path.join(
-        this.config.hunoRootPath,
-        'template/basicLayout.html',
+  #_getSingleOriginalHtmlTemplate(templateName) {
+    /**
+     * private function to get target html template
+     */
+    let filePath
+    if (this.#_config.template === 'default') {
+      filePath = path.join(
+        this.#_config.hunoRootPath,
+        `template/${templateName}.html`,
       )
     } else {
-      basicLayout = path.join(
-        this.config.rootPath,
-        `${this.config.templateDir}/${this.config.template}/basicLayout.html`,
+      filePath = path.join(
+        this.#_config.rootPath,
+        `${this.#_config.templateDir}/${
+          this.#_config.template
+        }/${templateName}.html`,
       )
     }
     try {
-      const content = fs.readFileSync(basicLayout, 'utf-8')
+      const content = fs.readFileSync(filePath, 'utf-8')
       return content
     } catch (err) {
-      console.error('read basic layout template error', err)
-      throw new Error(err)
+      console.error(chalk.redBright(`read ${filePath} template error \n${err}`))
+      process.exit(1)
     }
   }
 
-  getIndexListTemplate(list) {
-    let indexList
-    if (this.config.template === 'default') {
-      indexList = path.join(this.config.hunoRootPath, 'template/list.html')
-    } else {
-      indexList = path.join(
-        this.config.rootPath,
-        `${this.config.templateDir}/${this.config.template}/list.html`,
-      )
-    }
+  async renderAllPageConfigs() {
+    const listHtmlString = this.getRenderedIndexListHtmlString()
+    const indexPageConfig = this.getRenderedIndexPageConfig(listHtmlString)
+    const contentPageConfigs = await this.getAllContentPageConfig()
+    return [indexPageConfig, ...contentPageConfigs]
+  }
+
+  getRenderedIndexListHtmlString() {
+    /**
+     * read and render index list template
+     */
+    const list = this.#_compiledContentList
+      // filter out content with title and generate full config of list
+      .filter(({ config }) => config.title)
+      .map((item) => ({
+        ...item.config,
+        postLink: item.url,
+      }))
+    const indexListTemplate = this.#_getSingleOriginalHtmlTemplate('list')
     try {
-      const content = fs.readFileSync(indexList, 'utf-8')
-      return nunjucks.renderString(content, {
+      // render html with combined config
+      return nunjucks.renderString(indexListTemplate, {
+        ...this.#_config.globalParams,
         list,
       })
     } catch (err) {
-      console.error('read index list template error', err)
-      throw new Error(err)
+      console.error(chalk.redBright('render index list template error\n' + err))
+      process.exit(1)
     }
   }
 
-  generateIndexTemplate(basicLayout, list) {
-    const renderedBasicLayout = nunjucks.renderString(basicLayout, {
-      ...this.config.globalParams,
-    })
-    const basicLayoutHtml = cheerio.load(renderedBasicLayout)
-    const listHtml = basicLayoutHtml(list)
-    const mainElement = basicLayoutHtml('main#main')
-    mainElement.append(listHtml)
-    return basicLayoutHtml.html()
-  }
-
-  getContentListTemplate(list) {
-    let contentHtml
-    if (this.config.template === 'default') {
-      contentHtml = path.join(this.config.hunoRootPath, 'template/content.html')
-    } else {
-      contentHtml = path.join(
-        this.config.rootPath,
-        `${this.config.templateDir}/${this.config.template}/content.html`,
-      )
-    }
-    const result = []
+  getRenderedIndexPageConfig(listHtmlString) {
+    /**
+     * generate index page config
+     */
     try {
-      const content = fs.readFileSync(contentHtml, 'utf-8')
-      list.forEach((item) => {
-        result.push(
-          nunjucks.renderString(content, {
-            ...this.config.globalParams,
-            post: item.config,
-          }),
-        )
-      })
-      return result
-    } catch (err) {
-      console.error('read content list template error', err)
-      throw new Error(err)
-    }
-  }
-
-  writeIndex(content) {
-    const filePath = path.join(this.config.outputPath, 'index.html')
-    const fileExists = fs.existsSync(this.config.outputPath)
-    if (!fileExists) {
-      fs.mkdirSync(this.config.outputPath, { recursive: true })
-    }
-    fs.writeFile(filePath, content, (err) => {
-      if (err) {
-        console.error('Caught an error while writing index.html... ', err)
-        throw new Error(err)
+      const renderedBasicLayoutHtmlString = nunjucks.renderString(
+        this.#_originalBasicLayoutHtmlString,
+        {
+          ...this.#_config.globalParams,
+        },
+      )
+      const $ = cheerio.load(renderedBasicLayoutHtmlString)
+      const listDom = $(listHtmlString)
+      const mainElement = $('main#main')
+      mainElement.append(listDom)
+      return {
+        // used to write html files
+        htmlString: $.html(),
+        // used to manage links
+        url: '/',
+        // used to generate html files and directories
+        filePath: this.#_config.outputPath,
       }
-      console.log('Write index.html succeed!')
-    })
+    } catch (err) {
+      console.error(chalk.redBright('generate index page config error\n' + err))
+      process.exit(1)
+    }
   }
 
-  copyAssets() {
-    let assetsPath
-    if (this.config.template === 'default') {
-      assetsPath = path.join(this.config.hunoRootPath, 'template/assets')
-    } else {
-      assetsPath = path.join(
-        this.config.rootPath,
-        `${this.config.templateDir}/${this.config.template}/assets`,
+  getSingleRenderedContentHtmlString(compiledContent) {
+    /**
+     * read and render single content template
+     */
+    const contentTemplate = this.#_getSingleOriginalHtmlTemplate('article')
+    try {
+      const renderedContentTemplate = nunjucks.renderString(contentTemplate, {
+        ...this.#_config.globalParams,
+        ...compiledContent.config,
+      })
+      const $ = cheerio.load(renderedContentTemplate)
+      const article = $(compiledContent.html)
+      const postContent = $('div#postContent')
+      postContent.append(article)
+      return $.html()
+    } catch (err) {
+      console.error(
+        chalk.redBright(
+          `render single template with ${
+            compiledContent.filePath + '.md'
+          } file content went wrong\n` + err,
+        ),
       )
     }
-    const targetPath = path.join(this.config.outputPath, 'assets')
+  }
+
+  getRenderedSingleContentPageConfig(renderedContentTemplate, compiledContent) {
+    /**
+     * generate single content page config
+     */
     try {
-      fs.cp(assetsPath, targetPath, { recursive: true }, (err) => {
-        if (err) {
-          throw new Error(err)
-        }
-        console.log('Copy assets to output dir succeed!')
-      })
+      console.log(chalk.yellowBright('rendering index page config...'))
+
+      const { title = '', ...rest } = compiledContent.config
+      const renderedBasicLayoutHtmlString = nunjucks.renderString(
+        this.#_originalBasicLayoutHtmlString,
+        {
+          ...this.#_config.globalParams,
+          ...rest,
+          post: { title },
+        },
+      )
+      const $ = cheerio.load(renderedBasicLayoutHtmlString)
+      const content = $(renderedContentTemplate)
+      $('main#main').append(content)
+      console.log(chalk.greenBright('index page config rendered'))
+
+      return {
+        // used to write html files
+        htmlString: $.html(),
+        // used to manage links
+        url: compiledContent.url,
+        // used to generate html files and directories
+        filePath: compiledContent.filePath,
+      }
     } catch (err) {
-      console.error('Copy assets to output dir failed... ', err)
-      throw new Error(err)
+      console.error(
+        chalk.redBright(
+          `render single content page of ${compiledContent.filePath} file went wrong\n` +
+            err,
+        ),
+      )
     }
+  }
+
+  async getAllContentPageConfig() {
+    /**
+     * asynchronously generate all content page configs
+     */
+    console.log(chalk.yellowBright('rendering content page configs...'))
+    const promises = []
+    this.#_compiledContentList.forEach((item) => {
+      promises.push(
+        new Promise((resolve, reject) => {
+          try {
+            const contentTemplate =
+              this.getSingleRenderedContentHtmlString(item)
+            resolve(
+              this.getRenderedSingleContentPageConfig(contentTemplate, item),
+            )
+          } catch (err) {
+            reject(err)
+          }
+        }).catch((err) => {
+          console.error(chalk.redBright(err))
+        }),
+      )
+    })
+    const contentPageConfigs = await Promise.all(promises)
+    console.log(chalk.greenBright('content page configs rendered'))
+
+    return contentPageConfigs.filter((item) => !!item)
   }
 }

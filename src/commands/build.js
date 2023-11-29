@@ -3,16 +3,20 @@ import chalk from 'chalk'
 import { Config } from '../lib/config.js'
 import { Compiler } from '../lib/compiler.js'
 import { Renderer } from '../lib/renderer.js'
+import { Generator } from '../lib/generator.js'
 
 const action = async () => {
   const config = new Config()
   const compiler = new Compiler(config)
-  const renderer = new Renderer(config)
+  const compiledContentList = await compiler.compileAllContent()
 
-  const mds = await compiler.compileMds()
-  console.log(mds.map((md) => md.config))
-  console.log(mds.map((md) => md.filePath))
-  // renderer.renderAllHtml(mds)
+  const renderer = new Renderer(config, compiledContentList)
+  // console.log(mds.map((md) => md.url))
+  // console.log(mds.map((md) => md.filePath))
+  const pageConfigs = await renderer.renderAllPageConfigs()
+
+  const generator = new Generator(config)
+  await generator.generateAllFiles(pageConfigs)
 }
 
 export default {

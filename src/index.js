@@ -24,7 +24,7 @@ const setCommand = async () => {
             })
           resolve()
         } catch (err) {
-          console.error(chalk.bgRed(err))
+          console.error(chalk.redBright(err))
           process.exit(1)
         }
       }),

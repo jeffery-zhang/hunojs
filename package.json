@@ -5,10 +5,11 @@
   "main": "src/index.js",
   "type": "module",
   "bin": {
-    "huno": "bin/huno.js"
+    "huno": "huno.bin.cjs"
   },
   "files": [
-    "dist"
+    "huno.bin.cjs",
+    "template"
   ],
   "scripts": {
     "build": "node build.js"

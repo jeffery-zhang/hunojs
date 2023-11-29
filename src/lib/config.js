@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url'
 import fs from 'fs'
 import lodash from 'lodash'
 import yaml from 'yaml'
+import chalk from 'chalk'
 
 const defaultParams = {
   baseUrl: '/',
@@ -31,10 +32,15 @@ export class Config {
   }
 
   get hunoRootPath() {
-    const currentModuleUrl = import.meta.url
-    const currentModulePath = path.dirname(fileURLToPath(currentModuleUrl))
-    const rootDir = path.join(currentModulePath, '../..')
-    return rootDir
+    // polyfill for commonjs environment
+    if (__dirname) {
+      return __dirname
+    } else {
+      const currentModuleUrl = import.meta.url
+      const currentModulePath = path.dirname(fileURLToPath(currentModuleUrl))
+      const rootDir = path.join(currentModulePath, '../..')
+      return rootDir
+    }
   }
   get rootPath() {
     return this.#_rootPath
@@ -73,6 +79,8 @@ export class Config {
      * 初始化并合并基础配置和环境配置
      * 优先使用环境配置
      */
+    console.log('看看配置')
+    console.log(chalk.yellowBright('reading config files...'))
     const configPathExists = fs.existsSync(this.configPath)
     if (configPathExists) {
       const configExists = fs.existsSync(this.configFile)
@@ -81,16 +89,21 @@ export class Config {
       let baseConfig = {},
         envConfig = {}
       if (configExists) {
-        baseConfig = yaml.parse(
-          fs.readFileSync(this.configFile, 'utf-8') ?? '{}',
-        )
+        baseConfig = yaml.parse(fs.readFileSync(this.configFile, 'utf-8')) ?? {}
         this.#_config = lodash.merge(this.#_config, baseConfig)
       }
       if (envConfigExists) {
-        envConfig = yaml.parse(
-          fs.readFileSync(this.envConfigFile, 'utf-8') ?? '{}',
-        )
+        envConfig =
+          yaml.parse(fs.readFileSync(this.envConfigFile, 'utf-8')) ?? {}
         this.#_config = lodash.merge(this.#_config, envConfig)
+      }
+      console.log(chalk.greenBright('config files loaded!'))
+      if (!configExists && !envConfigExists) {
+        console.log(
+          chalk.yellowBright(
+            'No existing config files found. Huno is now building with default config...',
+          ),
+        )
       }
     }
   }
