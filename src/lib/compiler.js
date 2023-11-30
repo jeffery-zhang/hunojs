@@ -55,7 +55,8 @@ export class Compiler {
               if (err) {
                 throw new Error(err)
               }
-              const config = this.extractContentConfig(data)
+              const config =
+                this.extractContentConfig(data) ?? this.#_config.globalParams
               const html = this.compileContentWithoutConfig(data)
               resolve({
                 // absolute path of files, used to generate html files and directories

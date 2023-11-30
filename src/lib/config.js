@@ -79,7 +79,6 @@ export class Config {
      * 初始化并合并基础配置和环境配置
      * 优先使用环境配置
      */
-    console.log('看看配置')
     console.log(chalk.yellowBright('reading config files...'))
     const configPathExists = fs.existsSync(this.configPath)
     if (configPathExists) {
