@@ -3,10 +3,14 @@ import express from 'express'
 import path from 'path'
 import chalk from 'chalk'
 
+import { Config } from '../lib/config.js'
+
 const startPreviewServer = () => {
+  const config = new Config()
+
   const app = express()
-  const port = 8080
-  app.use('/', express.static(path.join(path.resolve(), 'dist')))
+  const port = config.port
+  app.use('/', express.static(config.outputPath))
 
   http.createServer(app).listen(port, () => {
     console.log(

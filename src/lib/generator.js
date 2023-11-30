@@ -25,6 +25,7 @@ export class Generator {
     console.log('writing: ' + targetFile)
     try {
       fs.writeFileSync(targetFile, content)
+      console.error(chalk.greenBright(`writing ${targetFile} succeed`))
     } catch (err) {
       console.error(chalk.redBright(`writing ${targetFile} failed \n${err}`))
       throw new Error(`writing ${targetFile} failed \n${err}`)
@@ -54,6 +55,25 @@ export class Generator {
     })
   }
 
+  #_copyPublic() {
+    const publicPath = path.join(this.#_config.rootPath, 'public')
+    return new Promise((resolve, reject) => {
+      fs.cp(
+        publicPath,
+        this.#_config.outputPath,
+        { recursive: true },
+        (err) => {
+          if (err) {
+            reject(err)
+          }
+          resolve()
+        },
+      )
+    }).catch((err) => {
+      console.error(chalk.redBright(`copy public failed \n${err}`))
+    })
+  }
+
   async generateAllFiles(pageConfigs) {
     console.log(chalk.yellowBright('generating all page files...'))
 
@@ -73,6 +93,7 @@ export class Generator {
       )
     })
     promises.push(this.#_copyAssets())
+    promises.push(this.#_copyPublic())
 
     await Promise.all(promises)
     console.log('Huno build finished!')

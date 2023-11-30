@@ -5,6 +5,8 @@ import { marked } from 'marked'
 import dayjs from 'dayjs'
 import chalk from 'chalk'
 
+import { replaceImgElement } from '../hooks/markedHooks'
+
 export class Compiler {
   constructor(config) {
     if (!config) {
@@ -14,6 +16,14 @@ export class Compiler {
       process.exit(1)
     }
     this.#_config = config
+
+    marked.use({
+      hooks: {
+        postprocess: (html) => {
+          return replaceImgElement(html, this.#_config)
+        },
+      },
+    })
   }
 
   #_config = {}
@@ -56,7 +66,7 @@ export class Compiler {
                 throw new Error(err)
               }
               const config =
-                this.extractContentConfig(data) ?? this.#_config.globalParams
+                this.extractContentConfig(data) ?? this.#_config.pageParams
               const html = this.compileContentWithoutConfig(data)
               resolve({
                 // absolute path of files, used to generate html files and directories
@@ -136,10 +146,11 @@ export class Compiler {
     /**
      * transfer file path to link url
      */
-    const realPath = path.resolve(filePath)
-    return realPath
+    const fullPath = path.resolve(filePath)
+    return fullPath
       .replace(this.#_config.contentPath, '')
       .replaceAll('\\', '/')
       .replace('.md', '')
+      .slice(1)
   }
 }

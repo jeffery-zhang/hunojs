@@ -36,10 +36,7 @@ export class Renderer {
      */
     let filePath
     if (this.#_config.template === 'default') {
-      filePath = path.join(
-        this.#_config.hunoRootPath,
-        `template/${templateName}.html`,
-      )
+      return this.#_config.defaultTemplate[templateName]
     } else {
       filePath = path.join(
         this.#_config.rootPath,
@@ -79,7 +76,7 @@ export class Renderer {
     try {
       // render html with combined config
       return nunjucks.renderString(indexListTemplate, {
-        ...this.#_config.globalParams,
+        ...this.#_config.pageParams,
         list,
       })
     } catch (err) {
@@ -96,7 +93,7 @@ export class Renderer {
       const renderedBasicLayoutHtmlString = nunjucks.renderString(
         this.#_originalBasicLayoutHtmlString,
         {
-          ...this.#_config.globalParams,
+          ...this.#_config.pageParams,
         },
       )
       const $ = cheerio.load(renderedBasicLayoutHtmlString)
@@ -124,7 +121,7 @@ export class Renderer {
     const contentTemplate = this.#_getSingleOriginalHtmlTemplate('article')
     try {
       const renderedContentTemplate = nunjucks.renderString(contentTemplate, {
-        ...this.#_config.globalParams,
+        ...this.#_config.pageParams,
         ...compiledContent.config,
       })
       const $ = cheerio.load(renderedContentTemplate)
@@ -154,7 +151,7 @@ export class Renderer {
       const renderedBasicLayoutHtmlString = nunjucks.renderString(
         this.#_originalBasicLayoutHtmlString,
         {
-          ...this.#_config.globalParams,
+          ...this.#_config.pageParams,
           ...rest,
           post: { title },
         },

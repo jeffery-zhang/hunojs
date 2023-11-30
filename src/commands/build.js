@@ -1,5 +1,3 @@
-import chalk from 'chalk'
-
 import { Config } from '../lib/config.js'
 import { Compiler } from '../lib/compiler.js'
 import { Renderer } from '../lib/renderer.js'

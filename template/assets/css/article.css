@@ -16,3 +16,7 @@
   gap: var(--gap-sm);
   color: var(--primary);
 }
+.post-image {
+  max-width: 100%;
+  margin: 0 auto;
+}

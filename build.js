@@ -8,6 +8,9 @@ esbuild
     outfile: 'huno.bin.cjs',
     platform: 'node',
     minify: true,
+    loader: {
+      '.html': 'text',
+    },
     plugins: [
       nodeExternalsPlugin({
         dependencies: false,

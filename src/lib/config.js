@@ -5,7 +5,11 @@ import lodash from 'lodash'
 import yaml from 'yaml'
 import chalk from 'chalk'
 
-const defaultParams = {
+import basicLayout from '../../template/basicLayout.html'
+import list from '../../template/list.html'
+import article from '../../template/article.html'
+
+const defaultPageParams = {
   baseUrl: '/',
   defaultLang: 'en',
   title: 'Huno',
@@ -23,12 +27,18 @@ export class Config {
   #_env = 'prod'
   #_configPath = 'config'
   #_configFile = 'config.yaml'
+  #_defaultTemplate = {
+    basicLayout,
+    list,
+    article,
+  }
   #_config = {
+    port: 8080,
     outputDir: 'dist',
     contentDir: 'content',
     templateDir: 'template',
     template: 'default',
-    globalParams: defaultParams,
+    pageParams: defaultPageParams,
   }
 
   get hunoRootPath() {
@@ -55,6 +65,12 @@ export class Config {
     const [pre, ext] = this.#_configFile.split('.')
     return path.join(this.#_configPath, `${pre}.${this.#_env}.${ext}`)
   }
+  get defaultTemplate() {
+    return this.#_defaultTemplate
+  }
+  get port() {
+    return this.#_config?.port
+  }
   get outputPath() {
     return path.join(this.#_rootPath, this.#_config?.outputDir)
   }
@@ -67,8 +83,8 @@ export class Config {
   get template() {
     return this.#_config.template
   }
-  get globalParams() {
-    return this.#_config.globalParams
+  get pageParams() {
+    return this.#_config.pageParams
   }
   get fullConfig() {
     return this.#_config
